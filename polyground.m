@@ -76,3 +76,16 @@ divisors = {f1, f2, f3};
 [q, r] = f.euclideanDivision(divisors);
 q{:}
 r
+
+%% Exercise 1, sec 6, p 81
+ord = @(s1, s2) lex(s1, s2);
+
+y = MultivariatePolynomial([0 1 0 1], ord, {'x', 'y', 'z'});
+x = MultivariatePolynomial([1 0 0 1], ord, {'x', 'y', 'z'});
+z = MultivariatePolynomial([0 0 1 1], ord, {'x', 'y', 'z'});
+
+g1 = x*y - x*z + y;
+g2 = x*y - z^2;
+g3 = x - y*z^4;
+
+

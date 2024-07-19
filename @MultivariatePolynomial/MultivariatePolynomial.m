@@ -118,8 +118,19 @@ classdef MultivariatePolynomial < handle
                     R((j-1)*numMon1 + i,:) = [monIJ coeffIJ];
                 end
             end
-            r = MultivariatePolynomial(R, obj1.ord, obj1.varNames);
+            r = MultivariatePolynomial(R, obj1.ord, obj2.varNames);
         end % END mtimes
+        
+        function y = mpower(obj, b)            
+            if b == 0                
+                y = 1;
+                return;
+            end
+            y = obj;
+            for i = 1:b-1
+                y =  obj * y;
+            end
+        end % END mpower
         
         
         function [q, r] = euclideanDivision(obj, divisors)
