@@ -8,6 +8,17 @@ classdef MultivariatePolynomial < handle
         varNames
     end
     
+    methods(Static)
+        function p = id(varName, ord)
+            n = numel(varName);
+            md = [zeros(1, n) 1];
+            if nargin <= 1
+                ord = @(s1, s2) lex(s1, s2);
+            end            
+            p = MultivariatePolynomial(md, ord, varName);
+        end
+    end
+    
     methods
         function obj = MultivariatePolynomial(matrixData, ord, varNames)
             %MULTIVARIATEPOLYNOMIAL Construct an instance of this class
@@ -48,7 +59,12 @@ classdef MultivariatePolynomial < handle
             lt = obj.matrixData(1, :);
         end
         
-        function f = iszzero(obj)
+        function ltPoly = leadTermAsPolynomial(obj)
+            lt = obj.leadTerm();
+            ltPoly = MultivariatePolynomial(lt, obj.ord, obj.varNames);
+        end
+        
+        function f = iszero(obj)
             f = isempty(obj.matrixData) || all(obj.matrixData(:, end)==0);
         end
         
@@ -63,6 +79,27 @@ classdef MultivariatePolynomial < handle
                 return;
             end
             r = MultivariatePolynomial([monomial_divide(obj.leadMonomial, other.leadMonomial) obj.leadCoeff/other.leadCoeff], obj.ord, obj.varNames);
+        end
+        
+        function s = spoly(obj, other)
+            lt1 = obj.leadTerm;
+            lt2 = other.leadTerm;
+            alp = lt1(1:obj.numIndeterminates);
+            bet = lt2(1:obj.numIndeterminates);
+            gam = max(alp, bet);
+            lc1 = lt1(end);
+            lc2 = lt2(end);
+            if all(gam == alp)
+                c1 = 1/lc1;
+            else
+                c1 = MultivariatePolynomial([gam - alp 1/lc1], obj.ord, obj.varNames);
+            end
+            if all(gam == bet)
+                c2 = 1/lc2;
+            else
+                c2 = MultivariatePolynomial([gam - bet 1/lc2], obj.ord, obj.varNames);
+            end
+            s = c1 * obj - c2 * other;
         end
         
         function collectMonomials(obj)
@@ -141,7 +178,7 @@ classdef MultivariatePolynomial < handle
                 q{i} = MultivariatePolynomial(zeros(1, obj.numIndeterminates+1), obj.ord, obj.varNames);
             end
             p = obj;
-            while ~p.iszzero()
+            while ~p.iszero()
                 i = 1;
                 divisionOccured = false;
                 while i <= numDiv && ~divisionOccured
@@ -164,7 +201,7 @@ classdef MultivariatePolynomial < handle
         
         function disp(obj)
             disp(['Polynomial of ', num2str(size(obj.matrixData,2)-1), ' variables'])
-            if obj.iszzero
+            if obj.iszero
                 disp('Zero polynomial')
             end
             polyString = '';
